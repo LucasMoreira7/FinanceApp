@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Cards           Cards[]
+  AssociatedUsers AssociatedUsers[]
+  CardPurchases   CardPurchases[]
+  Transactions    Transactions[]
+  Categories      Categories[]
+}
+
+model Cards {
+  id                 String   @id @default(cuid())
+  name               String   @unique
+  userId             String
+  invoiceClosingDate Int
+  invoiceDueDate     Int
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  Users         Users           @relation(fields: [userId], references: [id])
+  CardPurchases CardPurchases[]
+}
+
+model AssociatedUsers {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Users         Users           @relation(fields: [userId], references: [id])
+  CardPurchases CardPurchases[]
+  Transactions  Transactions[]
+}
+
+model CardPurchases {
+  id               String   @id @default(cuid())
+  purchasePrice    String
+  installments     Int
+  date             String
+  userId           String
+  associatedUserId String
+  cardId           String
+  category         String
+  description      String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  Users           Users           @relation(fields: [userId], references: [id])
+  AssociatedUsers AssociatedUsers @relation(fields: [associatedUserId], references: [id])
+  Cards           Cards           @relation(fields: [cardId], references: [id])
+}
+
+model Transactions {
+  id               String   @id @default(cuid())
+  price            String
+  expenseOrReceipt String
+  date             String
+  userId           String
+  associatedUserId String
+  category         String
+  description      String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  Users           Users           @relation(fields: [userId], references: [id])
+  AssociatedUsers AssociatedUsers @relation(fields: [associatedUserId], references: [id])
+}
+
+model Categories {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Users Users @relation(fields: [userId], references: [id])
+}
