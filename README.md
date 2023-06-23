@@ -1,0 +1,3 @@
+# FinanceApp
+
+Projeto autoral de um app para controle e gestão de finanças, onde será possível incluir receitas, despesas e compras de cartões de crédito e será apresentado um overview de suas finanças, para auxiliar no controle e melhor gestão. O projeto é composto por uma versão Web onde utilizamos o framework Next.js através da biblioteca React para criar as páginas de cadastro e vizualização dos dados, e por fim temos o Back-end, que foi desenvolvido através do Node.js, onde utilizamos a ferramenta Fastify para lidar com os roteamentos na aplicação, além de utilizamos o Prisma para realizar a comunicação com o banco de dados SQLite.
