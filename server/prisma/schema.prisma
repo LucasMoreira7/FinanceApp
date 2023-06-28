@@ -58,7 +58,7 @@ model CardPurchases {
   id               String   @id @default(cuid())
   purchasePrice    String
   installments     Int
-  date             String
+  date             DateTime
   userId           String
   associatedUserId String
   cardId           String
@@ -76,7 +76,7 @@ model Transactions {
   id               String   @id @default(cuid())
   price            String
   expenseOrReceipt String
-  date             String
+  date             DateTime
   userId           String
   associatedUserId String
   category         String

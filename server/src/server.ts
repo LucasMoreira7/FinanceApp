@@ -145,7 +145,7 @@ async function bootstrap(){
             data: {
                 purchasePrice,
                 installments,
-                date,
+                date: new Date(date),
                 category,
                 description,
                 userId,
@@ -176,8 +176,71 @@ async function bootstrap(){
         return reply.status(200).send({purchasesCount})
     })
 
+    fastify.post('/user/cardPurchases/filter', async (request, reply) => {
+        const countCardPurchaseBody = z.object({
+            userId: z.string(),
+            associatedUserId: z.string(),
+            cardId: z.string(),
+            month:z.number(),
+            year: z.number()
+    
+        })
+        const {userId,associatedUserId,cardId,month,year} = countCardPurchaseBody.parse(request.body)
+    
+        const cardCloseDate = await prisma.cards.findUnique({
+            where: {
+                id: cardId
+            },
+            select:{
+                invoiceClosingDate: true,
+            }
+        })
+
+        if(cardCloseDate){
+            const moment = require('moment-timezone')
+            const timezone = 'UTC'
+
+            const filterInitDate = new Date(year,month-2,cardCloseDate.invoiceClosingDate)
+            filterInitDate.setUTCHours(0, 0, 0, 0)
+            //console.log(filterInitDate)
+            //const filterInitDate = moment(filterData).tz(timezone).toDate()
+            const filterEndDate = new Date(filterInitDate.getFullYear(),filterInitDate.getMonth()+1,filterInitDate.getDate())
+            filterEndDate.setUTCHours(0, 0, 0, 0)
+            //const filterInitDate = moment.tz({ year: year, month:month -2 , day: cardCloseDate.invoiceClosingDate }, timezone).toDate()
+            //console.log(filterInitDate.getDate())
+            //const filterEndDate = moment.tz({ year: filterInitDate.getFullYear(), month:filterInitDate.getMonth()+1, day: filterInitDate.getDate()}, timezone).toDate()
+            //const filterEndDate = new Date(filterInitDate.getFullYear(),filterInitDate.getMonth()+1,filterInitDate.getDate())
+            console.log(filterInitDate)
+            console.log(filterEndDate)
+            const purchasesFilter = await prisma.cardPurchases.findMany({
+                where: {
+                    AND: {
+                        userId,
+                        associatedUserId,
+                        cardId,
+                        date:{
+                            gte:filterInitDate,
+                            lt:filterEndDate
+                        }
+                    }
+                }
+                
+            })
+
+            return reply.status(200).send(JSON.stringify(purchasesFilter))
+        }else{
+            reply.status(400).send({
+                message: 'Card not found.'
+            })
+        }
+        
+    
+        
+    })
+
     await fastify.listen({ port: 3333 })
 }
+
 
 
 bootstrap()
